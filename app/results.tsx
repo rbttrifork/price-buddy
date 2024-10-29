@@ -1,289 +1,244 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, Image, Linking } from 'react-native';
-import { Text, Card, Button, Divider, ActivityIndicator, Chip, Surface, IconButton, useTheme } from 'react-native-paper';
+import { StyleSheet, View, ScrollView, Image } from 'react-native';
+import { Text, Button, Divider, ActivityIndicator, Chip, useTheme } from 'react-native-paper';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { PriceResult } from '../services/priceComparisonService';
-import { ProductReviews } from '../services/reviewService';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 export default function ResultsScreen() {
   const router = useRouter();
-  const theme = useTheme();
   const params = useLocalSearchParams();
-  const [loading, setLoading] = useState({ prices: true, reviews: true });
-  const [prices, setPrices] = useState<PriceResult[]>([]);
-  const [reviews, setReviews] = useState<ProductReviews | null>(null);
-  const [sortBy, setSortBy] = useState<'price' | 'rating'>('price');
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const theme = useTheme();
 
-  // Parse labels from params
-  const labels = params.labels ? JSON.parse(params.labels as string) : [];
-
-  const renderMatchInfo = () => (
-    <Card style={styles.matchInfoCard}>
-      <Card.Content>
-        <View style={styles.matchHeaderRow}>
-          <Text variant="titleMedium">Match Information</Text>
-          <Chip 
-            icon={parseFloat(params.confidence as string) > 0.7 ? "check-circle" : "alert-circle"}
-            style={[
-              styles.confidenceChip,
-              {
-                backgroundColor: parseFloat(params.confidence as string) > 0.7 
-                  ? theme.colors.primaryContainer 
-                  : theme.colors.errorContainer
-              }
-            ]}
-          >
-            {Math.round(parseFloat(params.confidence as string) * 100)}% Confidence
-          </Chip>
-        </View>
-        
-        <Divider style={styles.divider} />
-        
-        <View style={styles.matchDetailsContainer}>
-          <Text variant="bodyMedium" style={styles.matchDetailTitle}>Detected Labels:</Text>
-          <View style={styles.labelsContainer}>
-            {labels.map((label: string, index: number) => (
-              <Chip 
-                key={index}
-                style={styles.labelChip}
-                textStyle={{ fontSize: 12 }}
-              >
-                {label}
-              </Chip>
-            ))}
-          </View>
-        </View>
-      </Card.Content>
-    </Card>
-  );
-
-  const renderPriceComparison = () => (
-    <Card style={styles.section}>
-      <Card.Title 
-        title="Price Comparison" 
-        right={() => (
-          <IconButton 
-            icon="sort" 
-            onPress={() => setSortBy(sortBy === 'price' ? 'rating' : 'price')} 
-          />
-        )}
-      />
-      <Card.Content>
-        {loading.prices ? (
-          <ActivityIndicator style={styles.loader} />
-        ) : (
-          prices
-            .sort((a, b) => sortBy === 'price' ? a.price - b.price : 0)
-            .map((item, index) => (
-              <Surface key={index} style={styles.priceItem} elevation={1}>
-                <View style={styles.priceHeader}>
-                  <Text variant="titleMedium" style={styles.storeName}>{item.store}</Text>
-                  <Text style={styles.price}>
-                    ${item.price.toFixed(2)}
-                  </Text>
-                </View>
-                <View style={styles.deliveryInfo}>
-                  <Chip 
-                    icon="truck-delivery" 
-                    style={[styles.infoChip, { backgroundColor: theme.colors.surfaceVariant }]}
-                  >
-                    {item.delivery?.type} 
-                    {item.delivery?.estimatedDays && ` (${item.delivery.estimatedDays} days)`}
-                  </Chip>
-                  {item.inStock ? (
-                    <Chip 
-                      icon="check" 
-                      style={[styles.infoChip, { backgroundColor: theme.colors.secondaryContainer }]}
-                    >
-                      In Stock
-                    </Chip>
-                  ) : (
-                    <Chip 
-                      icon="close" 
-                      style={[styles.infoChip, { backgroundColor: theme.colors.errorContainer }]}
-                    >
-                      Out of Stock
-                    </Chip>
-                  )}
-                </View>
-                <Button
-                  mode="contained"
-                  onPress={() => Linking.openURL(item.url)}
-                  style={styles.viewButton}
-                  labelStyle={styles.buttonLabel}
-                >
-                  View Deal
-                </Button>
-                {index < prices.length - 1 && <Divider style={styles.divider} />}
-              </Surface>
-            ))
-        )}
-      </Card.Content>
-    </Card>
-  );
-
-  // ... rest of the component code remains the same ...
+  // Dummy data for prototype
+  const priceComparisons = [
+    { store: 'Amazon', price: '$29.99', delivery: '2-day shipping' },
+    { store: 'Walmart', price: '$32.99', delivery: 'In store' },
+    { store: 'Target', price: '$34.99', delivery: 'Same day delivery' },
+  ];
 
   return (
-    <ScrollView style={styles.container}>
-      <Card style={styles.productCard}>
-        <Card.Title title={params.name as string} />
-        <Card.Content>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <LinearGradient
+        colors={['#0f2027', '#203a43']} // Dark teal to match home screen
+        style={StyleSheet.absoluteFill}
+      />
+      
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Product Information */}
+        <Animated.View 
+          entering={FadeInDown.delay(200).springify()}
+          style={styles.section}
+        >
+          <Text variant="headlineSmall" style={styles.productName}>
+            {params.name as string}
+          </Text>
+          
           {params.image && (
-            <Image 
-              source={{ uri: params.image as string }} 
-              style={styles.productImage} 
-            />
+            <View style={styles.imageContainer}>
+              <Image 
+                source={{ uri: params.image as string }} 
+                style={styles.productImage} 
+              />
+            </View>
           )}
+          
+          {params.confidence && (
+            <Chip 
+              icon="check" 
+              style={styles.confidenceChip}
+            >
+              Match Confidence: {Math.round(parseFloat(params.confidence as string) * 100)}%
+            </Chip>
+          )}
+          
           {params.description && (
-            <Text variant="bodyMedium" style={styles.description}>
+            <Text style={styles.description}>
               {params.description as string}
             </Text>
           )}
-        </Card.Content>
-      </Card>
+        </Animated.View>
 
-      {renderMatchInfo()}
+        {/* Price Comparisons */}
+        <Animated.View 
+          entering={FadeInDown.delay(300).springify()}
+          style={styles.section}
+        >
+          <Text variant="titleLarge" style={styles.sectionTitle}>
+            Price Comparison
+          </Text>
 
-      {error ? (
-        <Card style={styles.errorCard}>
-          <Card.Content>
-            <Text variant="bodyMedium" style={styles.errorText}>{error}</Text>
-            <Button 
-              mode="contained" 
-              onPress={() => router.push('/camera')}
-              style={styles.retryButton}
-            >
-              Try Again
-            </Button>
-          </Card.Content>
-        </Card>
-      ) : (
-        <>
-          {renderPriceComparison()}
-          {/* ... reviews section remains the same ... */}
-        </>
-      )}
+          {loading ? (
+            <ActivityIndicator style={styles.loader} color="#fff" />
+          ) : (
+            <View style={styles.priceList}>
+              {priceComparisons.map((item, index) => (
+                <View key={index} style={styles.priceItem}>
+                  <View style={styles.priceHeader}>
+                    <Text variant="titleMedium" style={styles.storeName}>
+                      {item.store}
+                    </Text>
+                    <Text variant="headlineSmall" style={styles.price}>
+                      {item.price}
+                    </Text>
+                  </View>
+                  
+                  <Text style={styles.deliveryInfo}>
+                    {item.delivery}
+                  </Text>
+                  
+                  <Button
+                    mode="outlined"
+                    onPress={() => {}}
+                    style={styles.viewButton}
+                    contentStyle={styles.buttonContent}
+                    labelStyle={styles.buttonLabel}
+                    textColor="#ffffff"
+                    icon="arrow-right"  // Added an icon
+                  >
+                    View Deal
+                  </Button>
+                  
+                  {index < priceComparisons.length - 1 && (
+                    <Divider style={styles.divider} />
+                  )}
+                </View>
+              ))}
+            </View>
+          )}
+        </Animated.View>
 
-      <Button
-        mode="contained"
-        style={styles.scanButton}
-        labelStyle={styles.buttonLabel}
-        onPress={() => router.push('/camera')}
-      >
-        Scan Another Product
-      </Button>
-    </ScrollView>
+        {/* Action Button */}
+        <Animated.View 
+          entering={FadeInDown.delay(400).springify()}
+          style={styles.buttonContainer}
+        >
+          <Button
+            mode="contained"
+            onPress={() => router.push('/camera')}
+            style={styles.scanButton}
+            contentStyle={styles.buttonContent}
+            labelStyle={styles.buttonLabel}
+            icon="camera"
+          >
+            Scan Another Product
+          </Button>
+        </Animated.View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0f2027',
   },
-  productCard: {
-    margin: 16,
-    marginBottom: 8,
+  scrollView: {
+    flex: 1,
   },
-  matchInfoCard: {
-    margin: 16,
-    marginTop: 8,
-    marginBottom: 8,
+  scrollContent: {
+    paddingBottom: 20,
   },
-  matchHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+  section: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginHorizontal: 16,
+    marginTop: 16,
+    padding: 20,
+    borderRadius: 16,
+    backdropFilter: 'blur(10px)',
   },
-  matchDetailsContainer: {
-    marginTop: 8,
+  productName: {
+    color: '#ffffff',
+    fontWeight: '600',
+    marginBottom: 16,
   },
-  matchDetailTitle: {
-    marginBottom: 8,
-    fontWeight: '500',
-  },
-  labelsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  labelChip: {
-    marginBottom: 4,
+  imageContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
   },
   productImage: {
     width: '100%',
     height: 200,
     resizeMode: 'contain',
-    marginBottom: 12,
-  },
-  description: {
-    marginTop: 8,
+    borderRadius: 8,
   },
   confidenceChip: {
-    borderRadius: 16,
+    alignSelf: 'flex-start',
+    marginBottom: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
-  section: {
-    margin: 16,
-    marginTop: 8,
+  description: {
+    color: '#ffffff',
+    opacity: 0.8,
   },
-  loader: {
-    padding: 20,
+  sectionTitle: {
+    color: '#ffffff',
+    fontWeight: '600',
+    marginBottom: 16,
   },
-  priceItem: {
-    padding: 16,
-    borderRadius: 12,
-    marginVertical: 8,
+  priceList: {
+    gap: 16,
   },
   priceHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
   },
   storeName: {
+    color: '#ffffff',
     flex: 1,
-    marginRight: 16,
   },
   price: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    color: '#ffffff',
+    fontWeight: '700',
   },
   deliveryInfo: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 12,
-  },
-  infoChip: {
-    borderRadius: 16,
-  },
-  viewButton: {
-    marginTop: 8,
-    borderRadius: 8,
-  },
-  buttonLabel: {
-    fontSize: 16,
-    paddingVertical: 2,
+    color: '#ffffff',
+    opacity: 0.7,
   },
   divider: {
-    marginVertical: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginVertical: 12,
   },
-  errorCard: {
-    margin: 16,
-  },
-  errorText: {
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  retryButton: {
-    marginTop: 8,
+  buttonContainer: {
+    padding: 16,
+    paddingTop: 8,
   },
   scanButton: {
-    margin: 16,
-    marginTop: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 12,
+  },
+  loader: {
+    padding: 20,
+  },
+  priceItem: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  viewButton: {
+    marginTop: 12,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderWidth: 1,
     borderRadius: 8,
+  },
+  buttonContent: {
+    height: 48,
+    flexDirection: 'row-reverse', // Puts icon on the right
+  },
+  buttonLabel: {
+    fontSize: 15,
+    fontWeight: '500',
+    letterSpacing: 0.5,
+    color: '#ffffff',
   },
 });

@@ -1,4 +1,3 @@
-// app/camera.tsx
 import React, { useState, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
