@@ -5,9 +5,7 @@ import { Camera, CameraView } from 'expo-camera';
 import { IconButton, Text, Portal, ActivityIndicator } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { ProductDetectionService } from '../services/productDetectionService';
-
-// STORE ME IN ENV VARIABLES
-const GOOGLE_CLOUD_API_KEY = 'AIzaSyCPdT3eqTbZlMtYdNkQ1EgJIVeTCG293hA';
+import Constants from 'expo-constants';
 
 export default function CameraScreen() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -15,7 +13,7 @@ export default function CameraScreen() {
   // @ts-ignore
   const cameraRef = useRef<Camera>(null);
   const router = useRouter();
-  const productDetectionService = new ProductDetectionService(GOOGLE_CLOUD_API_KEY);
+  const productDetectionService = new ProductDetectionService(Constants.expoConfig?.extra?.GOOGLE_CLOUD_API_KEY || '');
 
   React.useEffect(() => {
     (async () => {
