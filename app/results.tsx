@@ -1,4 +1,3 @@
-// app/results.tsx
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, Image, Linking } from 'react-native';
 import { Text, Card, Button, Divider, ActivityIndicator, Chip, Surface, IconButton, useTheme } from 'react-native-paper';

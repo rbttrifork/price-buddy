@@ -1,4 +1,3 @@
-// services/productAnalysisService.ts
 interface ProductIdentifiers {
     possibleNames: string[];
     brandName?: string;

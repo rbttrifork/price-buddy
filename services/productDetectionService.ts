@@ -1,4 +1,3 @@
-// services/productDetectionService.ts
 import * as FileSystem from 'expo-file-system';
 
 interface ProductDetectionResult {
