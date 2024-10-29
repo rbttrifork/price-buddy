@@ -5,6 +5,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { BlurredBackground } from '@/components/BlurEffectComponent';
 
 export default function ResultsScreen() {
   const router = useRouter();
@@ -22,15 +23,15 @@ export default function ResultsScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <LinearGradient
-        colors={['#0f2027', '#203a43']} // Dark teal to match home screen
+        colors={['#0f2027', '#203a43']}
         style={StyleSheet.absoluteFill}
       />
+      <BlurredBackground />
       
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Product Information */}
         <Animated.View 
           entering={FadeInDown.delay(200).springify()}
           style={styles.section}
@@ -112,8 +113,6 @@ export default function ResultsScreen() {
             </View>
           )}
         </Animated.View>
-
-        {/* Action Button */}
         <Animated.View 
           entering={FadeInDown.delay(400).springify()}
           style={styles.buttonContainer}

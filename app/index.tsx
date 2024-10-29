@@ -1,51 +1,51 @@
+// app/index.tsx
 import React from 'react';
 import { StyleSheet, View, Dimensions } from 'react-native';
-import { Text, Button, useTheme } from 'react-native-paper';
+import { Text, Button } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { PatternBackground } from '../components/PatternBackground';
+import { BlurredBackground } from '@/components/BlurEffectComponent';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const theme = useTheme();
 
   const features = [
     {
-      icon: '🔍',
-      title: 'Instant Price Check',
-      description: 'Compare prices across multiple stores in seconds'
+      step: '01',
+      title: 'Point & Scan',
+      description: 'Snap a photo of any product',
     },
     {
-      icon: '📸',
-      title: 'Just Take a Photo',
-      description: 'No typing needed - let AI do the work'
+      step: '02',
+      title: 'Compare Prices',
+      description: 'See prices from multiple stores',
     },
     {
-      icon: '💰',
+      step: '03',
       title: 'Save Money',
-      description: 'Find the best deals instantly'
+      description: 'Find the best available deals',
     }
   ];
 
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient
-        // More sophisticated, professional gradient
         colors={['#0f2027', '#203a43']}
         style={styles.gradient}
       >
-        <PatternBackground />
+        <BlurredBackground />
 
         <Animated.View 
           entering={FadeInDown.delay(200).springify()}
           style={styles.heroSection}
         >
           <Text variant="displaySmall" style={styles.title}>
-            Price Buddy
+            PriceLens
           </Text>
           <Text variant="headlineSmall" style={styles.subtitle}>
             Your Smart Shopping Assistant
@@ -57,58 +57,53 @@ export default function HomeScreen() {
           style={styles.featuresContainer}
         >
           {features.map((feature, index) => (
-            <View key={index} style={styles.featureItem}>
-              <View style={styles.iconContainer}>
-                <Text style={styles.featureIcon}>{feature.icon}</Text>
+            <View 
+              key={index} 
+              style={[
+                styles.featureItem,
+                index === features.length - 1 && styles.lastFeature
+              ]}
+            >
+              <View style={styles.stepIndicator}>
+                <Text style={styles.stepNumber}>{feature.step}</Text>
+                {index !== features.length - 1 && <View style={styles.stepLine} />}
               </View>
-              <View style={styles.featureText}>
-                <Text 
-                  variant="titleMedium" 
-                  style={styles.featureTitle}
-                >
+              <View style={styles.featureContent}>
+                <Text variant="titleMedium" style={styles.featureTitle}>
                   {feature.title}
                 </Text>
-                <Text 
-                  variant="bodyMedium" 
-                  style={styles.featureDescription}
-                >
+                <Text variant="bodyMedium" style={styles.featureDescription}>
                   {feature.description}
                 </Text>
               </View>
             </View>
           ))}
         </Animated.View>
-        <ActionButton/>
+
+        <Animated.View 
+          entering={FadeInUp.delay(600).springify()}
+          style={styles.actionSection}
+        >
+          <Button
+            mode="contained"
+            onPress={() => router.push('/camera')}
+            style={styles.mainButton}
+            contentStyle={styles.buttonContent}
+            labelStyle={styles.buttonLabel}
+            buttonColor="rgba(255, 255, 255, 0.2)"
+            icon="camera"
+          >
+            Start Scanning
+          </Button>
+          
+          <Text style={styles.helpText}>
+            Point your camera at any product to get started
+          </Text>
+        </Animated.View>
       </LinearGradient>
     </SafeAreaView>
   );
 }
-
-const ActionButton = () => {
-    const router = useRouter();
-    
-    return (
-      <Animated.View 
-        entering={FadeInUp.delay(600).springify()}
-        style={styles.actionSection}
-      >
-        <Button
-          mode="contained"
-          onPress={() => router.push('/camera')}
-          style={styles.mainButton}
-          contentStyle={styles.buttonContent}
-          labelStyle={styles.buttonLabel}
-          icon="camera"  // Add camera icon
-        >
-          Start Scanning
-        </Button>
-        
-        <Text style={styles.helpText}>
-          Point your camera at any product to get started
-        </Text>
-      </Animated.View>
-    );
-  };
 
 const styles = StyleSheet.create({
   container: {
@@ -121,7 +116,7 @@ const styles = StyleSheet.create({
   heroSection: {
     alignItems: 'center',
     paddingTop: 40,
-    paddingBottom: 20,
+    paddingBottom: 30,
   },
   title: {
     color: '#ffffff',
@@ -135,89 +130,77 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   featuresContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 24,
-    marginVertical: 20,
-    gap: 24,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    paddingHorizontal: 10,
   },
   featureItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
+    marginBottom: 30,
   },
-  iconContainer: {
-    backgroundColor: '#f5f5f5', // Light gray background for icons
-    width: 48,
-    height: 48,
+  lastFeature: {
+    marginBottom: 0,
+  },
+  stepIndicator: {
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  stepNumber: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+    opacity: 0.9,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    overflow: 'hidden',
+    marginBottom: 8,
   },
-  featureIcon: {
-    fontSize: 24,
-  },
-  featureText: {
+  stepLine: {
+    width: 1,
     flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginTop: 4,
+  },
+  featureContent: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   featureTitle: {
-    color: '#1a1a1a', // Almost black for better contrast
+    color: '#ffffff',
     fontWeight: '600',
     marginBottom: 4,
   },
   featureDescription: {
-    color: '#666666', // Darker gray for better readability
-    lineHeight: 20,
+    color: '#ffffff',
+    opacity: 0.7,
   },
   actionSection: {
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 30,
+    marginTop: 'auto',
   },
   mainButton: {
     width: width * 0.85,
-    borderRadius: 16,
+    borderRadius: 12,
     marginBottom: 12,
-    backgroundColor: '#ffffff',  // White button
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
   },
   buttonContent: {
-    height: 60,  // Taller button
-    flexDirection: 'row-reverse', // Icon on the right
-    gap: 8,
+    height: 56,
+    flexDirection: 'row-reverse',
   },
   buttonLabel: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1a237e',  // Match gradient color
+    color: '#FFF',
     letterSpacing: 0.5,
   },
   helpText: {
     color: '#ffffff',
-    opacity: 0.9,
+    opacity: 0.7,
     textAlign: 'center',
-    marginTop: 8,
-  }
+  },
 });
